@@ -20,12 +20,12 @@ def generateMac():
     return "".join(map(lambda x: '%02x' %x, address))
 
 def userInput():
-    var = str(input("Would you like to continue and reset the network? (y/n) "))
+    var = str(input("Would you like to continue and reset the network? (n to postpone\n) "))
     sys.stdout.flush()
-    if(var == "y" or var == "Y"):
-        return True
-    else:
+    if(var == "n" or var == "N"):
         return False
+    else:
+        return True
 
 def countdown():
     for x in range(15,0,-1):
