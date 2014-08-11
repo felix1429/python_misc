@@ -1,4 +1,4 @@
-import winreg, random, sys, os, subprocess, multiprocessing, time, pyperclip, ipaddress, uuid
+import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uuid
 
 results = [True]
 toggleList = ["disable","enable"]
@@ -56,10 +56,6 @@ def getResults(boolean):
     results[0] = boolean
 
 
-def copyToClipboard(macString):
-    pyperclip.copy(macString)
-
-
 def toggleNetworkCard(toggleList):
     for toggle in toggleList:
         subprocess.call("wmic path win32_networkadapter where index=2 "
@@ -109,7 +105,6 @@ if __name__ == "__main__":
             results[0] = True
             time.sleep(900)
 
-    copyToClipboard(address)
     setIP()    
     setDNS()
 
