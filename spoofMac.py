@@ -1,7 +1,8 @@
-import winreg, random, sys, os, subprocess, multiprocessing, time, pyperclip, ipaddress
+import winreg, random, sys, os, subprocess, multiprocessing, time, pyperclip, ipaddress, uuid
 
 results = [True]
 toggleList = ["disable","enable"]
+macList = ["02db304a241f","02db30677369"]
 
 
 def writeReg(mac):
@@ -23,6 +24,9 @@ def generateMac():
                random.randint(0x00, 0x7f)]
     return "".join(map(lambda x: '%02x' %x, address))
 
+
+def getCurrentMac():
+    return (''.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1]))
 
 def userInput():
     var = str(input("Would you like to continue and reset the network? (n to postpone\n) "))
@@ -80,8 +84,14 @@ def setDNS():
     
     
 if __name__ == "__main__":
-    newAddress = generateMac()
-    writeReg(newAddress)
+    currentAddress = getCurrentMac()
+    
+    for macAddress in macList:
+        if(macAddress != currentAddress):
+            address = macAddress
+            break
+        
+    writeReg(address)
 
     fn = [sys.stdin.fileno()] 
     p = multiprocessing.Pool(initializer = initialize, initargs = fn)
@@ -99,7 +109,7 @@ if __name__ == "__main__":
             results[0] = True
             time.sleep(900)
 
-    copyToClipboard(newAddress)
+    copyToClipboard(address)
     setIP()    
     setDNS()
 
