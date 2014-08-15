@@ -1,8 +1,9 @@
-import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uuid
+import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uuid, sys
 
 results = [True]
 toggleList = ["disable","enable"]
-macList = ["02db304a241f","02db30677369"]
+macList = ["02db304a241f","02db30677369","02db305c0f4f","02db30037e6b"]
+macLength = len(macList)
 
 
 def writeReg(mac):
@@ -14,6 +15,7 @@ def writeReg(mac):
         return True
     except WindowsError:
         print("Registry write failed")
+        sys.exit()
         return False
 
 
@@ -26,7 +28,16 @@ def generateMac():
 
 
 def getCurrentMac():
-    return (''.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0,8*6,8)][::-1]))
+    for line in subprocess.call("getmac",stdout=PIPE).stdout: 
+        print(line)
+        if line.lstrip().startswith("02"): 
+            mac = line.split(':')[1].strip().replace('-','') 
+            print(line)
+            break
+        else:
+            mac = (''.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0, 8*6, 8)][::-1]))
+
+    return mac
 
 def userInput():
     var = str(input("Would you like to continue and reset the network? (n to postpone\n) "))
@@ -81,12 +92,14 @@ def setDNS():
     
 if __name__ == "__main__":
     currentAddress = getCurrentMac()
-    
-    for macAddress in macList:
-        if(macAddress != currentAddress):
-            address = macAddress
-            break
-        
+    currentIndex = macList.index(currentAddress)
+
+    if(currentIndex != (macLength - 1)):
+        address = macList[currentIndex + 1]
+    else:
+        address = macList[0]
+
+    print("MAC address will be changed to " + address)    
     writeReg(address)
 
     fn = [sys.stdin.fileno()] 
@@ -107,4 +120,3 @@ if __name__ == "__main__":
 
     setIP()    
     setDNS()
-
