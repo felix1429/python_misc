@@ -2,7 +2,7 @@ import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uu
 
 results = [True]
 toggleList = ["disable","enable"]
-macList = ["02db304a241f","02db30677369","02db305c0f4f","02db30037e6b"]
+macList = ["02db304a241f","02db30677369"]
 macLength = len(macList)
 
 
@@ -28,15 +28,13 @@ def generateMac():
 
 
 def getCurrentMac():
-    for line in subprocess.call("getmac",stdout=PIPE).stdout: 
-        print(line)
-        if line.lstrip().startswith("02"): 
-            mac = line.split(':')[1].strip().replace('-','') 
-            print(line)
+    output = subprocess.Popen("getmac", stdout=subprocess.PIPE)
+    tmp = output.stdout.read().decode("utf-8")
+    lineArray = tmp.split("\n")
+    for line in lineArray:
+        if line.lstrip().startswith("02"):
+            mac = line.split(' ')[0].strip().replace('-','').lower()
             break
-        else:
-            mac = (''.join(['{:02x}'.format((uuid.getnode() >> i) & 0xff) for i in range(0, 8*6, 8)][::-1]))
-
     return mac
 
 def userInput():
@@ -76,8 +74,8 @@ def toggleNetworkCard(toggleList):
     
 def setIP():
     subprocess.call("netsh interface ip set address name=Wi-Fi "
-                + "source=static addr=192.168.2.3 "
-                + "mask=255.255.255.0 gateway=192.168.2.1 1")
+                + "source=static addr=10.251.19.133 "
+                + "mask=255.255.240.0 gateway=10.251.31.254 1")
     print("IP set")
 
 
@@ -91,6 +89,7 @@ def setDNS():
     
     
 if __name__ == "__main__":
+	
     currentAddress = getCurrentMac()
     currentIndex = macList.index(currentAddress)
 
@@ -98,7 +97,7 @@ if __name__ == "__main__":
         address = macList[currentIndex + 1]
     else:
         address = macList[0]
-
+        
     print("MAC address will be changed to " + address)    
     writeReg(address)
 
@@ -118,5 +117,7 @@ if __name__ == "__main__":
             results[0] = True
             time.sleep(900)
 
-    setIP()    
-    setDNS()
+    #setIP()    
+    #setDNS()
+
+	
