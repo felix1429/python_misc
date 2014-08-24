@@ -2,7 +2,7 @@ import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uu
 
 results = [True]
 toggleList = ["disable","enable"]
-macList = ["0c54a528785e","0c54a5791b29","0c54a53a5d63","0c54a5580c0c","0c54a5387803"]
+macList = ["0c54a528785e","0c54a5791b29","0c54a53a5d63","0c54a5580c0c","0c54a5387803","0c54a5284279","0c54a52b3900","0c54a51c2925","0c54a5441e67","0c54a524117e","0c54a5765e36","0c54a564543b"]
 macLength = len(macList)
 
 
