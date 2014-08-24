@@ -2,7 +2,7 @@ import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uu
 
 results = [True]
 toggleList = ["disable","enable"]
-macList = ["02db304a241f","02db30677369"]
+macList = ["02db304a241f","02db30677369","02db302e0e75"]
 macLength = len(macList)
 
 
@@ -16,15 +16,6 @@ def writeReg(mac):
     except WindowsError:
         print("Registry write failed")
         sys.exit()
-        return False
-
-
-def generateMac():
-    address = [0x02, 0xDB, 0x30,
-               random.randint(0x00, 0x7f),
-               random.randint(0x00, 0x7f),
-               random.randint(0x00, 0x7f)]
-    return "".join(map(lambda x: '%02x' %x, address))
 
 
 def getCurrentMac():
@@ -34,8 +25,10 @@ def getCurrentMac():
     for line in lineArray:
         if line.lstrip().startswith("02"):
             mac = line.split(' ')[0].strip().replace('-','').lower()
+            print(mac)
             break
     return mac
+
 
 def userInput():
     var = str(input("Would you like to continue and reset the network? (n to postpone\n) "))
@@ -70,24 +63,8 @@ def toggleNetworkCard(toggleList):
         subprocess.call("wmic path win32_networkadapter where index=2 "
                                 + "call " + toggle)
         time.sleep(1)
-
     
-def setIP():
-    subprocess.call("netsh interface ip set address name=Wi-Fi "
-                + "source=static addr=10.251.19.133 "
-                + "mask=255.255.240.0 gateway=10.251.31.254 1")
-    print("IP set")
 
-
-def setDNS():
-    subprocess.call("netsh interface ip set dns name=Wi-Fi "
-                    + "source=static addr=8.8.8.8")
-    time.sleep(1)
-    subprocess.call("netsh interface ip add dns name=Wi-Fi "
-                    + "addr=8.8.4.4 index=2")
-    print("DNS set")
-    
-    
 if __name__ == "__main__":
 	
     currentAddress = getCurrentMac()
@@ -116,8 +93,5 @@ if __name__ == "__main__":
             print("Postponing for 15 minutes")
             results[0] = True
             time.sleep(900)
-
-    #setIP()    
-    #setDNS()
 
 	
