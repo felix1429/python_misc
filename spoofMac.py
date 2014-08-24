@@ -2,14 +2,14 @@ import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uu
 
 results = [True]
 toggleList = ["disable","enable"]
-macList = ["02db304a241f","02db30677369","02db302e0e75"]
+macList = ["0c54a528785e","0c54a5791b29","0c54a53a5d63","0c54a5580c0c","0c54a5387803"]
 macLength = len(macList)
 
 
 def writeReg(mac):
     try:
         aReg = winreg.ConnectRegistry(None,winreg.HKEY_LOCAL_MACHINE)
-        keyVal = winreg.OpenKey(aReg, r"SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}\0002", 0, winreg.KEY_ALL_ACCESS)
+        keyVal = winreg.OpenKey(aReg, r"SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}\0000", 0, winreg.KEY_ALL_ACCESS)
         winreg.SetValueEx(keyVal,"NetworkAddress",0,winreg.REG_SZ,mac)
         print("Registry write completed successfully")
         return True
@@ -23,7 +23,7 @@ def getCurrentMac():
     tmp = output.stdout.read().decode("utf-8")
     lineArray = tmp.split("\n")
     for line in lineArray:
-        if line.lstrip().startswith("02"):
+        if line.lstrip().startswith("0C"):
             mac = line.split(' ')[0].strip().replace('-','').lower()
             print(mac)
             break
@@ -60,7 +60,7 @@ def getResults(boolean):
 
 def toggleNetworkCard(toggleList):
     for toggle in toggleList:
-        subprocess.call("wmic path win32_networkadapter where index=2 "
+        subprocess.call("wmic path win32_networkadapter where index=0 "
                                 + "call " + toggle)
         time.sleep(1)
     
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         address = macList[currentIndex + 1]
     else:
         address = macList[0]
-        
+    
     print("MAC address will be changed to " + address)    
     writeReg(address)
 
