@@ -4,6 +4,7 @@ results = [True]
 toggleList = ["disable","enable"]
 wiredList = ["0c54a528785e","0c54a5791b29","0c54a53a5d63","0c54a5580c0c","0c54a5387803","0c54a5284279","0c54a52b3900","0c54a51c2925","0c54a5441e67","0c54a524117e","0c54a5765e36","0c54a564543b"]
 wirelessList = ["02db3064780b","02db30356416","02db300e1773","02db30640e5f","02db30681a3b","02db302d174c","02db30570a0f","02db3028761a","02db30763301","02db30593f24","02db300f6f3e","02db30452657"]
+listList = [wiredList, wirelessList]
 
 
 def writeReg(mac, reg):
@@ -79,7 +80,9 @@ if __name__ == "__main__":
     if currentAddress in macList:
         currentIndex = macList.index(currentAddress)
     else:
-        currentIndex = random.randrange(macLength)
+        for value in listList:
+            if value != macList:
+                currentIndex = value.index(currentAddress)
 
     if(currentIndex != (macLength - 1)):
         address = macList[currentIndex + 1]
