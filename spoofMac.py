@@ -84,13 +84,12 @@ if __name__ == "__main__":
     elif currentAddress.startswith("02"):
         reg = "2"
         macLength = len(macList)
-        if currentAddress in macList:
-            currentIndex = macList.index(currentAddress)
-        else:
-            for value in listList:
-                if value != macList:
-                    currentIndex = value.index(currentAddress)
-
+##        if currentAddress in macList:
+##            currentIndex = macList.index(currentAddress)
+##        else:
+##            for value in listList:
+##                if value != macList:
+##                    currentIndex = value.index(currentAddress)
         if(currentIndex != (macLength - 1)):
             address = macList[currentIndex + 1]
         else:
