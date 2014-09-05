@@ -2,9 +2,10 @@ import winreg, random, sys, os, subprocess, multiprocessing, time, ipaddress, uu
 
 results = [True]
 toggleList = ["disable","enable"]
-wiredList = ["0c54a528785e","0c54a5791b29","0c54a53a5d63","0c54a5580c0c","0c54a5387803","0c54a5284279","0c54a52b3900","0c54a51c2925","0c54a5441e67","0c54a524117e","0c54a5765e36","0c54a564543b"]
-wirelessList = ["02db3064780b","02db30356416","02db300e1773","02db30640e5f","02db30681a3b","02db302d174c","02db30570a0f","02db3028761a","02db30763301","02db30593f24","02db300f6f3e","02db30452657"]
-listList = [wiredList, wirelessList]
+#wiredList = ["0c54a528785e","0c54a5791b29","0c54a53a5d63","0c54a5580c0c","0c54a5387803","0c54a5284279","0c54a52b3900","0c54a51c2925","0c54a5441e67","0c54a524117e","0c54a5765e36","0c54a564543b"]
+#listList = [wiredList, wirelessList]
+macList = ["02db3064780b","02db30356416","02db300e1773","02db30640e5f","02db30681a3b","02db302d174c","02db30570a0f","02db3028761a","02db30763301","02db30593f24","02db300f6f3e","02db30452657"]
+
 
 
 def writeReg(mac, reg):
@@ -30,6 +31,14 @@ def getCurrentMac():
     return mac
 
 
+def generateMac():
+    address = [0x0c, 0x54, 0xa5,
+               random.randint(0x00, 0x7f),
+               random.randint(0x00, 0x7f),
+               random.randint(0x00, 0x7f)]
+    return "".join(map(lambda x: '%02x' %x, address))
+
+
 def userInput():
     var = str(input("Would you like to continue and reset the network? (n to postpone\n) "))
     sys.stdout.flush()
@@ -44,7 +53,7 @@ def countdown():
         if(x != 1):
             endStr = ", "
         else:
-            endStr = ""
+            endStr = "\n"
         print(x,end = endStr)
         sys.stdout.flush()
         time.sleep(1)
@@ -71,23 +80,21 @@ if __name__ == "__main__":
 
     if currentAddress.startswith("0c"):
         reg = "0"
-        macList = wiredList
+        address = generateMac()
     elif currentAddress.startswith("02"):
         reg = "2"
-        macList = wirelessList
-    macLength = len(macList)
+        macLength = len(macList)
+        if currentAddress in macList:
+            currentIndex = macList.index(currentAddress)
+        else:
+            for value in listList:
+                if value != macList:
+                    currentIndex = value.index(currentAddress)
 
-    if currentAddress in macList:
-        currentIndex = macList.index(currentAddress)
-    else:
-        for value in listList:
-            if value != macList:
-                currentIndex = value.index(currentAddress)
-
-    if(currentIndex != (macLength - 1)):
-        address = macList[currentIndex + 1]
-    else:
-        address = macList[0]
+        if(currentIndex != (macLength - 1)):
+            address = macList[currentIndex + 1]
+        else:
+            address = macList[0]
     
     print("MAC address will be changed to " + address)    
     writeReg(address, reg)
