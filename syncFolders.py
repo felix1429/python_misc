@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # Dispatch - synchronize two folders
 
-import os
-import filecmp
-import shutil
+
+import os, filecmp, shutil
 from stat import *
 
 class Dispatch:
@@ -18,6 +17,9 @@ class Dispatch:
     def add_node(self, node):
         self.node_list.append(node)
 
+    def clear_nodes(self):
+        self.node_list[:] = []
+
     def compare_nodes(self):
         ''' This method takes the nodes in the node_list and compares them '''
         nodeListLength = len(self.node_list)
@@ -26,7 +28,7 @@ class Dispatch:
             # If the list has another item after it, compare them
             if self.node_list.index(node) < len(self.node_list) - 1:
                 node2 = self.node_list[self.node_list.index(node) + 1]
-                print('\nComparing Node ' + str(self.node_list.index(node)) + ' and Node ' + str(self.node_list.index(node) + 1) + ':')
+                print('\nSyncing Node ' + str(self.node_list.index(node)) + ' to Node ' + str(self.node_list.index(node) + 1) + ':')
                 # Passes the two root directories of the nodes to the recursive _compare_directories.
                 self._compare_directories(node.root_path, node2.root_path)
 
@@ -74,8 +76,10 @@ class Dispatch:
                     shutil.copy2(srcpath, dest)
                 finally:
                     self.file_copied_count = self.file_copied_count + 1
-                    print('Copied \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"\n')
-
+                    try:
+                        print('Copied \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"\n')
+                    except UnicodeEncodeError as e:
+                        print('Copied file\n')
 
 class Node:
     ''' This class represents a node in a dispatch synchronization '''
@@ -87,9 +91,19 @@ class Node:
 
 
 if __name__ == "__main__":
-    a = Dispatch()
-    rasp_node = Node("/media/External Drive/shares/Music")
-    pc_node = Node("/mnt/pcmusic")
-    a.add_node(rasp_node)
-    a.add_node(pc_node)
-    a.compare_nodes()
+    try:
+        a = Dispatch()
+        ext_node = Node("E:/shares/Album Art")
+        pc_node = Node("D:/Music/Album Art")
+        a.add_node(ext_node)
+        a.add_node(pc_node)
+        a.compare_nodes()
+        a.clear_nodes()
+        ext_node = Node("E:/shares/Music")
+        pc_node = Node("D:/Music/Music")
+        a.add_node(ext_node)
+        a.add_node(pc_node)
+        a.compare_nodes()
+    except FileNotFoundError:
+        raise SystemExit(print("Directory not found, exiting"))
+    print('Completed')
