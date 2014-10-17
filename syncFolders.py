@@ -11,24 +11,31 @@ class Dispatch:
     def __init__(self, name=''):
         self.name = name
         self.node_list = []
+        self.name_list = []
         self.file_copied_count = 0
         self.folder_copied_count = 0
 
     def add_node(self, node):
         self.node_list.append(node)
+        self.name_list.append(node.name)
 
     def clear_nodes(self):
         self.node_list[:] = []
+        self.name_list[:] = []
 
     def compare_nodes(self):
         ''' This method takes the nodes in the node_list and compares them '''
         nodeListLength = len(self.node_list)
         # For each node in the list
         for node in self.node_list:
+            node_index = self.node_list.index(node)
             # If the list has another item after it, compare them
-            if self.node_list.index(node) < len(self.node_list) - 1:
+            if node_index < nodeListLength - 1:
                 node2 = self.node_list[self.node_list.index(node) + 1]
-                print('\nSyncing Node ' + str(self.node_list.index(node)) + ' to Node ' + str(self.node_list.index(node) + 1) + ':')
+                try:
+                    print('\nSyncing Node ' + self.name_list[node_index] + ' to Node ' + self.name_list[node_index + 1] + ':')
+                except UnicodeEncodeError as e:
+                    print('Syncing Node 0 to 1')
                 # Passes the two root directories of the nodes to the recursive _compare_directories.
                 self._compare_directories(node.root_path, node2.root_path)
 
@@ -65,7 +72,10 @@ class Dispatch:
             if os.path.isdir(srcpath):
                 shutil.copytree(srcpath, os.path.join(dest, os.path.basename(f)))
                 self.folder_copied_count = self.folder_copied_count + 1
-                print('Copied directory \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"')
+                try:
+                    print('Copied directory \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"')
+                except UnicodeEncodeError as e:
+                    print('Copied file\n')
             else:
                 try:
                     shutil.copy2(srcpath, dest)
@@ -85,25 +95,37 @@ class Node:
     ''' This class represents a node in a dispatch synchronization '''
 
     def __init__(self, path, name=''):
-        self.name = name
+        self.name = path
         self.root_path = os.path.abspath(path)
         self.file_list = os.listdir(self.root_path)
 
-
-if __name__ == "__main__":
+def run(external, pc):
     try:
         a = Dispatch()
-        ext_node = Node("E:/shares/Album Art")
-        pc_node = Node("D:/Music/Album Art")
+        ext_node = Node(external)
+        pc_node = Node(pc)
         a.add_node(ext_node)
         a.add_node(pc_node)
         a.compare_nodes()
         a.clear_nodes()
-        ext_node = Node("E:/shares/Music")
-        pc_node = Node("D:/Music/Music")
-        a.add_node(ext_node)
-        a.add_node(pc_node)
-        a.compare_nodes()
     except FileNotFoundError:
-        raise SystemExit(print("Directory not found, exiting"))
+        print("Directory not found, aborting sync")
+
+
+if __name__ == "__main__":
+    run("E:/shares/Album Art", "D:/Music/Album Art")
+    run("G:Media/Album Art", "D:/Music/Album Art")
+
+    run("E:/shares/Music", "D:/Music/Music")
+    run("G:/Media/Music", "D:/Music/Music")
+
+    run("E:/shares/Torrent Files", "D:/Torrents/Torrent files")
+    run("G:/Torrents/Torrent Files", "D:/Torrents/Torrent files")
+
+    run("E:/shares/uTorrent AppData", "C:/Users/Trevor/AppData/Roaming/uTorrent")
+    run("G:/Torrents/uTorrent AppData", "C:/Users/Trevor/AppData/Roaming/uTorrent")
+    
+    run("G:/Torrents/Media", "D:/Torrents/Media")
+
+    run("E:/shares/Movies", "G:/Media/Movies")
     print('Completed')
