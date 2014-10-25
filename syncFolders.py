@@ -113,19 +113,19 @@ def run(external, pc):
 
 
 if __name__ == "__main__":
-    run("E:/shares/Album Art", "D:/Music/Album Art")
-    run("G:Media/Album Art", "D:/Music/Album Art")
+    run("E:/shares/Album Art", "H:/Music/Album Art")
+    run("G:Media/Album Art", "H:/Music/Album Art")
 
-    run("E:/shares/Music", "D:/Music/Music")
-    run("G:/Media/Music", "D:/Music/Music")
+    run("E:/shares/Music", "H:/Music/Music")
+    run("G:/Media/Music", "H:/Music/Music")
 
-    run("E:/shares/Torrent Files", "D:/Torrents/Torrent files")
-    run("G:/Torrents/Torrent Files", "D:/Torrents/Torrent files")
+    run("E:/shares/Torrent Files", "H:/Torrents/Torrent files")
+    run("G:/Torrents/Torrent Files", "H:/Torrents/Torrent files")
 
     run("E:/shares/uTorrent AppData", "C:/Users/Trevor/AppData/Roaming/uTorrent")
     run("G:/Torrents/uTorrent AppData", "C:/Users/Trevor/AppData/Roaming/uTorrent")
     
-    run("G:/Torrents/Media", "D:/Torrents/Media")
+    run("G:/Torrents/Media", "H:/Torrents/Media")
 
     run("E:/shares/Movies", "G:/Media/Movies")
     print('Completed')
