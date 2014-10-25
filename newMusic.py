@@ -6,13 +6,15 @@ import os
 
 def getArtist():
     while True:
-        artist_name = str(input("Input the name of the artist: "))
+        artist_name = str(input("Input the name of the artist: "))      
         try:
+            if "/" in artist_name:
+                raise OSError()
             os.makedirs("C://{0}".format(artist_name))
             os.removedirs("C://{0}".format(artist_name))
             return artist_name
         except OSError:
-            print("Invalid character for file name, please\n"
+            print("Invalid character for file name, please "
                   + "input a different artist name")
 
 
@@ -20,11 +22,13 @@ def getAlbum():
     while True:
         album_name = str(input("Input the name of the album: "))
         try:
+            if "/" in album_name:
+                raise OSError()
             os.makedirs("C://{0}".format(album_name))
             os.removedirs("C://{0}".format(album_name))
             return album_name
         except OSError:
-            print("Invalid character for file name, please\n"
+            print("Invalid character for file name, please "
                   + "input a different album name")
 
 if __name__ == "__main__":
