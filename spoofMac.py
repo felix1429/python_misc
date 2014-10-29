@@ -42,7 +42,7 @@ def generateMac(macDigits):
 
 
 def userInput():
-    var = str(input("Would you like to continue and reset the network? (n to postpone\n) "))
+    var = str(input("Would you like to continue and reset the network? (n to postpone)\n "))
     sys.stdout.flush()
     if(var == "n" or var == "N"):
         return False
@@ -74,6 +74,9 @@ def toggleNetworkCard(toggleList, reg):
         subprocess.call("wmic path win32_networkadapter where index="
                                 + reg + " call " + toggle)
         time.sleep(1)
+
+def notify(adapterType, address):
+    print(adapterType + " MAC address will be changed to " + address)
     
 
 if __name__ == "__main__":
@@ -84,12 +87,14 @@ if __name__ == "__main__":
         reg = "0"
         macDigits = ethernetMac
         address = generateMac(macDigits)
+        adapterType = "Wired"
     elif currentAddress.startswith("02"):
         reg = "2"
         macDigits = wirelessMac
+        adapterType = "Wireless"
     address = generateMac(macDigits)       
 
-    print("MAC address will be changed to " + address)    
+    notify(adapterType, address)
     writeReg(address, reg)
 
     fn = [sys.stdin.fileno()] 
