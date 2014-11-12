@@ -74,22 +74,30 @@ class Dispatch:
                 self.folder_copied_count = self.folder_copied_count + 1
                 try:
                     print('Copied directory \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"')
-                except UnicodeEncodeError as e:
-                    print('Copied file\n')
+                except UnicodeEncodeError:
+                    print('Copied directory\n')
             else:
+                success = False
                 try:
                     shutil.copy2(srcpath, dest)
-                except IOError as e:
-                    filelist = [f for f in os.listdir(dest)]
-                    for f in filelist:
-                        os.remove(os.path.join(dest, f))
-                    shutil.copy2(srcpath, dest)
-                finally:
-                    self.file_copied_count = self.file_copied_count + 1
+                    success = True
+                except IOError:
                     try:
-                        print('Copied \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"\n')
-                    except UnicodeEncodeError as e:
-                        print('Copied file\n')
+                        filelist = [f for f in os.listdir(dest)]
+                        for f in filelist:
+                            os.remove(os.path.join(dest, f))
+                        shutil.copy2(srcpath, dest)
+                        sucess = True
+                    except PermissionError:
+                        print("A permission error occurred, the file \""
+                              + os.path.basename(srcpath) + "\" may be in use")
+                finally:
+                    if success:
+                        self.file_copied_count = self.file_copied_count + 1
+                        try:
+                            print('Copied \"' + os.path.basename(srcpath) + '\" from \"' + os.path.dirname(srcpath) + '\" to \"' + dest + '\"\n')
+                        except UnicodeEncodeError:
+                            print('Copied file\n')
 
 class Node:
     ''' This class represents a node in a dispatch synchronization '''
@@ -114,7 +122,7 @@ def run(external, pc):
 
 if __name__ == "__main__":
     run("E:/shares/Album Art", "H:/Music/Album Art")
-    run("G:Media/Album Art", "H:/Music/Album Art")
+    run("G:/Media/Album Art", "H:/Music/Album Art")
 
     run("E:/shares/Music", "H:/Music/Music")
     run("G:/Media/Music", "H:/Music/Music")
@@ -127,5 +135,8 @@ if __name__ == "__main__":
     
     run("G:/Torrents/Media", "H:/Torrents/Media")
 
-    run("E:/shares/Movies", "G:/Media/Movies")
+    run("G:/Media/Movies", "E:/shares/Movies")
+
+    run("G:/Other/foobar2000", "C:/Users/Trevor/AppData/Roaming/foobar2000")
+    run("E:/shares/Other/foobar2000", "C:/Users/Trevor/AppData/Roaming/foobar2000")
     print('Completed')
