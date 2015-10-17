@@ -36,22 +36,24 @@ class Dispatch:
                     print('\nSyncing Node ' + self.name_list[node_index] + ' to Node ' + self.name_list[node_index + 1] + ':')
                 except UnicodeEncodeError as e:
                     print('Syncing Node 0 to 1')
-                # Passes the two root directories of the nodes to the recursive _compare_directories.
-                self._compare_directories(node.root_path, node2.root_path)
+                # Passes the two root directories of the nodes to the recursive compare_directories.
+                self.compare_directories(node.root_path, node2.root_path)
 
-    def _compare_directories(self, left, right):
+    def compare_directories(self, left, right):
         ''' This method compares directories. If there is a common directory, the
             algorithm must compare what is inside of the directory by calling this
             recursively.
+            right = internal
+            left = external
         '''
         comparison = filecmp.dircmp(left, right)
         if comparison.common_dirs:
             for d in comparison.common_dirs:
-                self._compare_directories(os.path.join(left, d), os.path.join(right, d))
-#        if comparison.left_only:
-#            self._copy(comparison.left_only, left, right)
+                self.compare_directories(os.path.join(left, d), os.path.join(right, d))
+        if comparison.left_only:
+            self.delete(comparison.left_only, left)
         if comparison.right_only:
-            self._copy(comparison.right_only, right, left)
+            self.copy(comparison.right_only, right, left)
         left_newer = []
         right_newer = []
         if comparison.diff_files:
@@ -62,10 +64,10 @@ class Dispatch:
                     left_newer.append(d)
                 else:
                     right_newer.append(d)
-#        self._copy(left_newer, left, right)
-        self._copy(right_newer, right, left)
+#        self.copy(left_newer, left, right)
+        self.copy(right_newer, right, left)
 
-    def _copy(self, file_list, src, dest):
+    def copy(self, file_list, src, dest):
         ''' This method copies a list of files from a source node to a destination node '''
         for f in file_list:
             srcpath = os.path.join(src, os.path.basename(f))
@@ -99,6 +101,32 @@ class Dispatch:
                         except UnicodeEncodeError:
                             print('Copied file\n')
 
+    def delete(self, file_list, src):
+        for f in file_list:
+            path = os.path.join(src, os.path.basename(f))
+##            answer = str(input("Do you want to delete " + path + "? (y/n) "))
+            answer = "y"
+            if answer == "y":
+                try:
+                    shutil.rmtree(path)
+                    self.deletePrint("directory", path)                    
+                except NotADirectoryError:
+                    os.remove(path)
+                    self.deletePrint("file", path)
+                except FileNotFoundError:
+                    print("we herped")
+                    print("file " + path)
+            else:
+                print("guess not")
+
+    def deletePrint(self, deletedType, path):
+        try:
+            print("Deleted " + deletedType + " " + path)
+        except UnicodeEncodeError:
+            print("Deleted " + deletedType)
+                
+        
+
 class Node:
     ''' This class represents a node in a dispatch synchronization '''
 
@@ -121,22 +149,23 @@ def run(external, pc):
 
 
 if __name__ == "__main__":
-    run("E:/shares/Album Art", "H:/Music/Album Art")
-    run("G:/Media/Album Art", "H:/Music/Album Art")
+    run("D:/shares/Music/Album Art", "H:/Music/Album Art")
+    run("G:/Media/Music/Album Art", "H:/Music/Album Art")
 
-    run("E:/shares/Music", "H:/Music/Music")
-    run("G:/Media/Music", "H:/Music/Music")
+    run("D:/shares/Music/Music", "H:/Music/Music")
+    run("G:/Media/Music/Music", "H:/Music/Music")
 
-    run("E:/shares/Torrent Files", "H:/Torrents/Torrent files")
+    run("D:/shares/Torrent Files", "H:/Torrents/Torrent files")
     run("G:/Torrents/Torrent Files", "H:/Torrents/Torrent files")
 
-    run("E:/shares/uTorrent AppData", "C:/Users/Trevor/AppData/Roaming/uTorrent")
-    run("G:/Torrents/uTorrent AppData", "C:/Users/Trevor/AppData/Roaming/uTorrent")
+    run("D:/shares/uTorrent AppData", "C:/Users/felix1429/AppData/Roaming/uTorrent")
+    run("G:/Torrents/uTorrent AppData", "C:/Users/felix1429/AppData/Roaming/uTorrent")
     
     run("G:/Torrents/Media", "H:/Torrents/Media")
 
-    run("G:/Media/Movies", "E:/shares/Movies")
+    run("G:/Media/Movies", "D:/shares/Movies")
 
-    run("G:/Other/foobar2000", "C:/Users/Trevor/AppData/Roaming/foobar2000")
-    run("E:/shares/Other/foobar2000", "C:/Users/Trevor/AppData/Roaming/foobar2000")
+    run("G:/Other/foobar2000", "C:/Users/felix1429/AppData/Roaming/foobar2000")
+    run("D:/shares/Other/foobar2000", "C:/Users/felix1429/AppData/Roaming/foobar2000")
+##    run("C:/Users/felix1429/Desktop/syncTest/external", "C:/Users/felix1429/Desktop/syncTest/internal")
     print('Completed')
