@@ -20,7 +20,9 @@ def getArtist(args):
             print("Invalid character for file name, please "
                   + "input a different artist name")
 
-def getAlbum():
+def getAlbum(args, artist_name):
+    if args.s:
+        return artist_name
     while True:
         albumName = str(input("Input the name of the album: "))
         try:
@@ -40,14 +42,23 @@ def getLastArtist():
 def writeFile(artist):
     with open("artist.file", "w") as file:
         file.write(artist)
-                   
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+
+def defineArgs(parser):
     parser.add_argument("-a", help = "set the artist as the last artist entered",
                         action = "store_true")
-    args = parser.parse_args() 
+    parser.add_argument("-s", help = "set the album name as the name of the artist",
+                        action = "store_true")
+    return parser
+
+def initArgs():
+    parser = defineArgs(argparse.ArgumentParser())
+    args = parser.parse_args()
+    return args
+                   
+if __name__ == "__main__":
+    args = initArgs()
     artist_name = getArtist(args)
-    album_name = getAlbum()
+    album_name = getAlbum(args, artist_name)
     w = "H://Music/Music/{0}/{1}".format(artist_name, album_name)
     x = "H://Music/Album Art/{0}/{1}".format(artist_name, album_name)
     dir_list = [w, x]
