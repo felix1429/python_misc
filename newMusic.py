@@ -1,39 +1,39 @@
 #! c:/python34/scripts python
 #creates an album and an artist folder in music and album art directory of both
-#internal and external hdd
 
 import os, argparse
 
 def getArtist(args):
     if args.a:
         return getLastArtist()
-    while True:
-        artistName = str(input("Input the name of the artist: "))      
-        try:
-            if "/" in artistName:
-                raise OSError()
-            os.makedirs("C://{0}".format(artistName))
-            os.removedirs("C://{0}".format(artistName))
-            writeFile(artistName)
-            return artistName
-        except OSError:
-            print("Invalid character for file name, please "
-                  + "input a different artist name")
+    else:
+        artist = getInput("artist")
+        writeFile(artist)
+        return artist
 
-def getAlbum(args, artist_name):
+def getAlbum(args, artistName):
     if args.s:
-        return artist_name
+        return artistName
+    else:
+        return getInput("album")
+
+def validateName(name, foo):
+    try:
+        if "/" in name:
+            raise OSError()
+        os.makedirs("C://{0}".format(name))
+        os.removedirs("C://{0}".format(name))
+        return True
+    except OSError:
+        print("Invalid character for file name, please "
+              + "input a different " + foo + " name")
+        return False
+    
+def getInput(foo):
     while True:
-        albumName = str(input("Input the name of the album: "))
-        try:
-            if "/" in albumName:
-                raise OSError()
-            os.makedirs("C://{0}".format(albumName))
-            os.removedirs("C://{0}".format(albumName))
-            return albumName
-        except OSError:
-            print("Invalid character for file name, please "
-                  + "input a different album name")
+        name = str(input("Input the name of the " + foo + ": "))
+        if validateName(name, foo):
+            return name    
 
 def getLastArtist():
     with open("artist.file", "r") as file:
