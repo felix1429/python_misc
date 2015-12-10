@@ -1,39 +1,39 @@
 #! c:/python34/scripts python
 #creates an album and an artist folder in music and album art directory of both
-#internal and external hdd
 
-import os, argparse
+import os, argparse, requests, json, urllib
 
 def getArtist(args):
     if args.a:
         return getLastArtist()
-    while True:
-        artistName = str(input("Input the name of the artist: "))      
-        try:
-            if "/" in artistName:
-                raise OSError()
-            os.makedirs("C://{0}".format(artistName))
-            os.removedirs("C://{0}".format(artistName))
-            writeFile(artistName)
-            return artistName
-        except OSError:
-            print("Invalid character for file name, please "
-                  + "input a different artist name")
+    else:
+        artist = getInput("artist")
+        writeFile(artist)
+        return artist
 
-def getAlbum(args, artist_name):
+def getAlbum(args, artistName):
     if args.s:
-        return artist_name
+        return artistName
+    else:
+        return getInput("album")
+
+def validateName(name, foo):
+    try:
+        if "/" in name:
+            raise OSError()
+        os.makedirs("C://{0}".format(name))
+        os.removedirs("C://{0}".format(name))
+        return True
+    except OSError:
+        print("Invalid character for file name, please "
+              + "input a different " + foo + " name")
+        return False
+    
+def getInput(foo):
     while True:
-        albumName = str(input("Input the name of the album: "))
-        try:
-            if "/" in albumName:
-                raise OSError()
-            os.makedirs("C://{0}".format(albumName))
-            os.removedirs("C://{0}".format(albumName))
-            return albumName
-        except OSError:
-            print("Invalid character for file name, please "
-                  + "input a different album name")
+        name = str(input("Input the name of the " + foo + ": "))
+        if validateName(name, foo):
+            return name    
 
 def getLastArtist():
     with open("artist.file", "r") as file:
@@ -54,15 +54,32 @@ def initArgs():
     parser = defineArgs(argparse.ArgumentParser())
     args = parser.parse_args()
     return args
+
+def fetchAlbumArt(artist, album, path):
+    url = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/wa/wsSearch?term=" + album + " " + artist + "&entity=album"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        artUrl = data["results"][0]["artworkUrl100"]
+        hiResUrl = artUrl.replace("100x100bb", "100000x100000-999")
+        img = urllib.request.urlopen(hiResUrl)
+        saveImage(img, path)
+    except e:
+        print("didn't work: " + e)
+
+def saveImage(img, path):
+    with open(path + "cover.jpg", "wb") as file:
+        file.write(img.read())
                    
 if __name__ == "__main__":
     args = initArgs()
-    artist_name = getArtist(args)
-    album_name = getAlbum(args, artist_name)
-    w = "H://Music/Music/{0}/{1}".format(artist_name, album_name)
-    x = "H://Music/Album Art/{0}/{1}".format(artist_name, album_name)
-    dir_list = [w, x]
-    for foo in dir_list:
+    artistName = getArtist(args)
+    albumName = getAlbum(args, artistName)
+    w = "H://Music/Music/{0}/{1}/".format(artistName, albumName)
+    x = "H://Music/Album Art/{0}/{1}/".format(artistName, albumName)
+    dirList = [w, x]
+    for foo in dirList:
         if os.path.exists(foo) is False:
             os.makedirs(foo)
         os.startfile(foo)
+    fetchAlbumArt(artistName, albumName, x)
